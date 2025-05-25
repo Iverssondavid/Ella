@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Te Amo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      overflow: hidden;
+      font-family: 'Arial', sans-serif;
+      position: relative;
+      height: 100vh;
+    }
+
+    .rain {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .drop {
+      position: absolute;
+      color: #ff4d6d;
+      white-space: nowrap;
+      user-select: none;
+      opacity: 0.9;
+      animation-name: fall;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+      animation-iteration-count: 1; /* Animación 1 vez, la reinicia JS */
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-10vh) translateX(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh) translateX(20px);
+        opacity: 0.8;
+      }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .spin {
+      animation: spin 6s linear infinite;
+    }
+
+    .center-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 4em;
+      color: #ff4d6d;
+      text-shadow: 0 0 20px #ff4d6d;
+      display: none;
+      z-index: 2;
+    }
+
+    audio {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="rain" id="rain"></div>
+  <div class="center-message" id="centerMessage">💓 Te Amo 💓</div>
+
+  <!-- Audio sin autoplay directo para evitar bloqueo -->
+  <audio id="bgMusic" loop>
+    <source src="audio.mpeg.mp3" type="audio/mpeg">
+    Tu navegador no soporta el audio.
+  </audio>
+  
+
+  <script>
+    const rainContainer = document.getElementById('rain');
+    const cantidad = 120;
+
+    function crearLluvia() {
+      for (let i = 0; i < cantidad; i++) {
+        crearDrop();
+      }
+    }
+
+    function crearDrop() {
+      const drop = document.createElement('div');
+      drop.classList.add('drop');
+
+      const esCorazon = Math.random() < 0.5;
+      drop.textContent = esCorazon ? '💓' : 'Te Amo';
+
+      const tamaño = Math.random() * 20 + 14;
+      drop.style.fontSize = `${tamaño}px`;
+
+      // Posición horizontal inicial
+      drop.style.left = `${Math.random() * 100}vw`;
+      // Posición vertical inicial fuera de pantalla arriba
+      drop.style.top = `-${Math.random() * 100}vh`;
+
+      // Duración de la animación (caída)
+      const duracion = Math.random() * 5 + 8;
+      drop.style.animationDuration = `${duracion}s`;
+
+      // Animación spin aleatoria
+      if (Math.random() < 0.3) {
+        drop.classList.add('spin');
+      }
+
+      // Al terminar la animación, reiniciamos la caída
+      drop.addEventListener('animationend', () => {
+        // Reiniciar posición arriba con nueva posición horizontal
+        drop.style.left = `${Math.random() * 100}vw`;
+        drop.style.top = `-10vh`;
+
+        // Cambiar duración y reiniciar animación
+        const nuevaDuracion = Math.random() * 5 + 8;
+        drop.style.animationDuration = `${nuevaDuracion}s`;
+
+        // Forzar reinicio de la animación
+        drop.style.animation = 'none';
+        // Pequeño retraso para reiniciar
+        setTimeout(() => {
+          drop.style.animation = `fall ${nuevaDuracion}s linear forwards`;
+        }, 10);
+      });
+
+      // Aplicar animación por primera vez
+      drop.style.animation = `fall ${duracion}s linear forwards`;
+
+      rainContainer.appendChild(drop);
+    }
+
+    crearLluvia();
+
+    // Mensaje central al hacer clic o tocar
+    document.body.addEventListener('click', mostrarMensaje);
+    document.body.addEventListener('touchstart', mostrarMensaje);
+
+    function mostrarMensaje() {
+      const msg = document.getElementById('centerMessage');
+      msg.style.display = 'block';
+      msg.style.opacity = '1';
+      msg.style.transform = 'translate(-50%, -50%) scale(1.2)';
+
+      setTimeout(() => {
+        msg.style.opacity = '0';
+        msg.style.transform = 'translate(-50%, -50%) scale(1)';
+      }, 2000);
+
+      setTimeout(() => {
+        msg.style.display = 'none';
+      }, 2500);
+    }
+      // Reproducir audio al primer clic o toque para evitar bloqueo de autoplay
+      const bgMusic = document.getElementById('bgMusic');
+
+function playAudio() {
+  bgMusic.play().catch(() => {
+    console.log('No se pudo reproducir el audio automáticamente');
+  });
+  document.body.removeEventListener('click', playAudio);
+  document.body.removeEventListener('touchstart', playAudio);
+}
+
+document.body.addEventListener('click', playAudio);
+    document.body.addEventListener('touchstart', playAudio);
+
+  </script>
+</body>
+</html>
